@@ -9,9 +9,7 @@ The `type` parameter is used to find the next pipeline to run, for instance a ty
 ## Setting up named repository
 The tricky part of getting this working is setting up your named repository. For this to work you need to have your information handy about where your source code is located. The first step is to create a `Service Connection` to your repo in the Project Settings. You will set up a name for your connection, this will be your `endpoint` in the YAML Definition. 
 
-The `repository` definition is what you will use to refer to the resource, for instance `template: mypipeline.yaml@[repository]`. Here it's simple called "pipelines".
-
-The `name` of the resource is actual name of the repository.
+The `repository` definition is what you will use to refer to the resource, for instance `template: mypipeline.yaml@[repository]`. Here it's simply called "pipelines". The `name` element of the resource is full name of the repository (i.e. everything after _https://github.com_).
 
 ```yaml
 # Get the Azure Pipelines templates
