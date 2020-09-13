@@ -1,0 +1,49 @@
+# Exclude Azure Pipelines (Ops Development) branches from CI
+trigger:
+  branches:
+    exclude:
+    - Azure-Pipelines*
+
+parameters:
+  - name: ProjectType
+    default: # nodejs or dotnet
+  - name: MajorBuild
+    default: 1
+  - name: MinorBuild
+    default: 0
+  - name: BuildConfiguration
+    values:
+      - Release
+    default: Release
+
+name: $(Rev:r)-$(Build.SourceBranchName)
+
+# Get the Azure Pipelines templates
+resources:
+  repositories:
+  - repository: pipelines
+    type: [e.g. bitbucket]
+    name: [full name/of repo]
+    endpoint: [endpoint name in AzDO]
+
+# Run the Azure Pipeline template (as defined by the ProjectType)
+extends:
+  template: azure-pipelines-${{ parameters.ProjectType }}.yaml@pipelines
+  parameters:
+    BuildNo: ${{ parameters.MajorBuild }}.${{ parameters.MinorBuild }}.$(Build.BuildNumber)
+    BuildConfiguration: ${{ parameters.BuildConfiguration }}
+    #BuildFile: # Optional - direct path to build file (otherwise it will default to **/*.csproj)
+
+# BuildSteps options:
+# 3 options are available:
+# - PreRestoreSteps:
+#   These steps are run first
+# - PreBuildSteps:
+#   These steps are run after the Restore, before the 'Build'
+# - PreDockerSteps:
+#   These steps are run after the 'Build' and before the Container is built
+# To add additional, custom buildsteps, include the entry like so:
+# PreRestoreSteps|PreBuildSteps|PreDockerSteps:
+#   - [Build Step full notation]
+#
+# Note: Currently the ability to pass variables not defined in this pipeline is not available
