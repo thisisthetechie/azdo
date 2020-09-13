@@ -14,7 +14,7 @@ The `repository` definition is what you will use to refer to the resource, for i
 The `name` of the resource is actual name of the repository.
 
 ```yaml
-# Get the Azure Pipelines templates from Bitbucket
+# Get the Azure Pipelines templates
 resources:
   repositories:
   - repository: pipelines
