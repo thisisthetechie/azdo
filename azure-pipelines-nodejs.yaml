@@ -1,0 +1,60 @@
+# NodeJS Pipeline Template
+parameters:
+  - name: DockerRegistry
+    default: 'MyDockerRegistry'
+  - name: NPMFeed
+    default: MyNPMFeed
+  - name: NugetFeed
+    default: MyNugetFeed
+  - name: BuildNo
+    default: ''
+  - name: BuildConfiguration
+    default: ''
+  - name: PreRestoreSteps 
+    type: stepList
+    default: [] 
+  - name: PreBuildSteps 
+    type: stepList
+    default: [] 
+  - name: PreDockerSteps 
+    type: stepList
+    default: [] 
+   
+stages:
+  - stage: BuildStage
+    displayName: Build Stage
+    pool:
+      name: Azure Pipelines
+      vmImage: 'ubuntu-20.04'
+    jobs:
+      - job: BuildContainer
+        displayName: Build Linux Container
+        steps:
+          - ${{ each step in parameters.PreRestoreSteps }}:
+            - ${{ each pair in step }}:
+                ${{ pair.key }}: ${{ pair.value }}  
+          - task: Npm@1
+            displayName: 'npm install'
+            inputs:
+              verbose: false
+              customEndpoint: ${{ parameters.NPMFeed }}
+          - ${{ each step in parameters.PreBuildSteps }}:
+            - ${{ each pair in step }}:
+                ${{ pair.key }}: ${{ pair.value }}  
+          - task: Npm@1
+            displayName: 'npm compile server'
+            inputs:
+              command: custom
+              verbose: false
+              customCommand: 'run compile:server'
+          - ${{ each step in parameters.PreDockerSteps }}:
+            - ${{ each pair in step }}:
+                ${{ pair.key }}: ${{ pair.value }}  
+          - task: Docker@2
+            displayName: buildAndPush
+            inputs:
+              containerRegistry: '${{ parameters.DockerRegistry }}'
+              repository: '$(Build.DefinitionName)'
+              buildContext: '$(System.DefaultWorkingDirectory)'
+              tags: '${{ parameters.BuildNo }}'
+          
