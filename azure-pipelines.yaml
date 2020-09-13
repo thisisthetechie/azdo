@@ -22,9 +22,9 @@ name: $(Rev:r)-$(Build.SourceBranchName)
 resources:
   repositories:
   - repository: pipelines
-    type: [e.g. bitbucket]
-    name: [full name/of repo]
-    endpoint: [endpoint name in AzDO]
+    type: github
+    name: thisisthetechie/azdo
+    endpoint: github
 
 # Run the Azure Pipeline template (as defined by the ProjectType)
 extends:
