@@ -39,3 +39,17 @@ extends:
       - task: Echo a comment
         script: echo "I am running"
 ```  
+
+This works via 3 parameters defined in the main template definition: `PreRestoreSteps`, `PreBuildSteps` and `PreDockerSteps`. You can see the setup of these elements in the main templates as _stepList_ parameters and a _foreach_ type declaration in the job steps:
+
+```yaml
+  - name: PreRestoreSteps 
+    type: stepList
+    default: [] 
+  
+ ...
+
+  - ${{ each step in parameters.PreRestoreSteps }}:
+    - ${{ each pair in step }}:
+      ${{ pair.key }}: ${{ pair.value }}  
+```
