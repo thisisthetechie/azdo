@@ -4,7 +4,7 @@ A working example how to extend a pipeline for simplified "Bootstrapping" Azure 
 ## Usage
 The base `azure-pipelines.yaml` file needs to be included in the root of a repo, with AzDO pointed to this file when setting up your pipeline.
 
-The `type` parameter is used to find the next pipeline to run, for instance a type of `dotnet` will extend onto the `azure-pipelines-dotnet.yaml` pipeline definition. 
+The `type` parameter is used to find the next pipeline to run, for instance a type of `dotnet` will extend onto the `azure-pipelines-dotnet.yaml` pipeline definition. The _template_ property of the `extends` function shows you how that works. The name of the yaml file is requested from the `pipelines` named respository in the `resources` section.
 
 ## Additional Steps
 It is possible to add additional steps into your build pipeline from the base `azure-pipelines.yaml` definition that is stored within the application repo. To achieve this, add new parameters to the `extends.parameters` section to pass in full build step definitions as parameters.
