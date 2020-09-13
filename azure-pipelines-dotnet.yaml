@@ -1,0 +1,66 @@
+# DotNet Pipeline Template
+parameters:
+  - name: DockerRegistry
+    default: 'MyDockerRegistry'
+  - name: NPMFeed
+    default: MyNPMFeed
+  - name: NugetFeed
+    default: MyNugetFeed
+  - name: BuildNo
+    default: ''
+  - name: BuildConfiguration
+    default: ''
+  - name: BuildFile
+    default: '**/*.csproj'
+  - name: PreRestoreSteps 
+    type: stepList
+    default: [] 
+  - name: PreBuildSteps 
+    type: stepList
+    default: [] 
+  - name: PreDockerSteps 
+    type: stepList
+    default: [] 
+   
+stages:
+  - stage: BuildStage
+    displayName: Build Stage
+    pool:
+      name: Azure Pipelines
+      vmImage: 'ubuntu-20.04'
+    jobs:
+    - job: BuildContainer
+      displayName: Build Linux Container
+      steps:
+        - ${{ each step in parameters.PreRestoreSteps }}:
+          - ${{ each pair in step }}:
+              ${{ pair.key }}: ${{ pair.value }}   
+        - task: NuGetCommand@2
+          displayName: 'NuGet restore'
+          inputs:
+            vstsFeed: '${{ parameters.NugetFeed }}'
+        - ${{ each step in parameters.PreBuildSteps }}:
+          - ${{ each pair in step }}:
+              ${{ pair.key }}: ${{ pair.value }}   
+        - task: DotNetCoreCLI@2
+          displayName: 'dotnet build'
+          inputs:
+            projects: ${{ parameters.BuildFile }}
+            arguments: '--configuration ${{ parameters.BuildConfiguration }} -r linux-x64'
+        - task: DotNetCoreCLI@2
+          displayName: 'dotnet publish'
+          inputs:
+            command: publish
+            arguments: '--configuration ${{ parameters.BuildConfiguration }} -r linux-x64 --output $(build.artifactstagingdirectory)'
+            zipAfterPublish: false
+            modifyOutputPath: false
+        - ${{ each step in parameters.PreDockerSteps }}:
+          - ${{ each pair in step }}:
+              ${{ pair.key }}: ${{ pair.value }}   
+        - task: Docker@2
+          displayName: buildAndPush
+          inputs:
+            containerRegistry: '${{ parameters.DockerRegistry }}'
+            repository: '$(Build.DefinitionName)'
+            buildContext: '$(build.artifactstagingdirectory)'
+            tags: '${{ parameters.BuildNo }}'
